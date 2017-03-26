@@ -10,6 +10,7 @@ module.exports = function (mongoose) {
             required: true,
             default: ""
         },
+        tags: [String]
     }, { versionKey: false });
 
     note.set("toJSON", {

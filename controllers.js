@@ -9,7 +9,7 @@ module.exports = (app, schema) => {
     });
 
     app.get("/api/notes", (request, response) => {
-        schema.Note.find({}, "_id preview").then(notes => {
+        schema.Note.find({}, "_id preview tags").then(notes => {
             response.status(200).json({ results: notes });
         }, error => {
             handleError(response, error.message, "Failed to find notes.");
@@ -27,7 +27,7 @@ module.exports = (app, schema) => {
     });
 
     app.get("/api/notes/:id", (request, response) => {
-        schema.Note.findById(request.params.id, "_id text").then(note => {
+        schema.Note.findById(request.params.id, "_id text tags").then(note => {
             response.status(200).json(note);
         }, error => {
             handleError(response, error.message, "Failed to get note.");
