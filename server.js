@@ -1,22 +1,35 @@
+require('env2')('./env.json');
 var bodyParser = require("body-parser");
+var controllers = require("./controllers/controllers.js");
 var cors = require("cors");
-var express = require("express");
-var models = require("./models.js");
-var mongoose = require("mongoose");
+var db = require("./db/db.js");
+const App = require("./common/app.js");
 
-var app = express();
+var app = App();
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.text({type: "application/text"}));
 
-mongoose.connect(process.env.database);
-var db = mongoose.connection;
-db.on("error", console.error.bind(console, "connection error:"));
-db.once("open", function () {
-    console.log("Database connection ready");
-    var server = app.listen(process.env.PORT || 8080, function () {
-        var port = server.address().port;
+controllers.init(app);
+
+if (process.env.https === true) {
+    app.use((request, response, next) => {
+        var protocol = request.get('x-forwarded-proto');
+        protocol == 'https' ? next() : response.redirect('https://' + request.hostname + request.url);
+    });
+}
+
+(async () => {
+    try {
+        await db.init(process.env.database);
+        console.log("Database connection ready");
+    }
+    catch (error) {
+        console.log(error.message);
+        process.exit(0);
+    }
+    let server = app.listen(process.env.PORT || 8082, () => {
+        let port = server.address().port;
         console.log("App now running on port", port);
     });
-});
-
-require("./controllers.js")(app, models(mongoose));
+})();
