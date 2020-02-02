@@ -22,9 +22,10 @@ module.exports = (app) => {
     });
 
     app.put("/api/notes/:id", authenticateUser, async (request, response) => {
-        request.body.preview = request.body.text.split("\n")[0];
-        let commandResult = await db.Note.findOneAndUpdate({ _id: request.params.id, owners: request.user }, request.body);
-        commandResult === null ? response.status(204).end() : response.status(404).end();
+        let index = request.body.text.indexOf("\n");
+        request.body.preview = request.body.text.slice(0, index);
+        let result = await db.Note.update({ _id:request.params.id, owners: [request.user] }, request.body);
+        return response.status(result.n === 1 ? 204 : 404).end();
     });
 
     app.delete("/api/notes/:id", authenticateUser, async (request, response) => {
