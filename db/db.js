@@ -54,7 +54,7 @@ module.exports = function () {
 
     let init = async (connectionString) => {
         mongoose.Promise = Promise;
-        await mongoose.connect(connectionString, { useMongoClient: true });
+        await mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
     }
 
     return {
